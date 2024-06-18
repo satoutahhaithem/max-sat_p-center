@@ -15,4 +15,5 @@ Install NumPy and PySAT packages using pip:
 pip install numpy
 pip install python-sat[pblib,aiger]
 pip install python-sat
+ pip install networkx
 ```

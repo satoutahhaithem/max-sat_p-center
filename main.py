@@ -1,59 +1,63 @@
-from pysat.solvers import Minisat22
-from pysat.formula import IDPool, WCNF
+from pysat.formula import *
+from pysat.pb import EncType as pbenc
+from pysat.pb import *
+from pysat.card import *
+from pysat.solvers import *
+from pysat.examples.rc2 import RC2
+from pysat.formula import WCNF
+import sys
 
-# Initialize variable ID pool
-vpool = IDPool()
+def dijkstra(vertices, graph, src):
+    import heapq
 
-# Example Data
-N = [1, 2, 3, 4, 5]  # Demand nodes
-M = [1, 2]           # Facility nodes
-R = [10, 15, 20, 25, 30, 35, 40, 50, 60, 80]  # Distances
-K = range(1, 11)     # Indices for distances
-p = 2                # Number of centers
+    # Initialize distances with infinity and set the distance to src as 0
+    dist = [float('inf')] * vertices
+    dist[src] = 0
 
-# Variables
-z = {k: vpool.id(f'z_{k}') for k in K}  # Radius selection variables
-y = {j: vpool.id(f'y_{j}') for j in M}  # Center placement variables
+    # Priority queue to store vertices and their distances
+    pq = [(0, src)]  # (distance, vertex)
 
-# Initialize weighted CNF formula
-wcnf = WCNF()
+    while pq:
+        current_dist, u = heapq.heappop(pq)
 
-# Objective function: maximize the sum of radius values
-for k in K:
-    wcnf.append([z[k]], weight=R[k-1])
+        # If current distance is greater than the recorded distance, skip
+        if current_dist > dist[u]:
+            continue
 
-# Example adjacency matrix for distances
-# d[i][j] represents the distance between demand node i and facility node j
-d = [
-    [25, 90],
-    [35, 45],
-    [50, 55],
-    [70, 30],
-    [90, 60]
+        # Traverse neighbors of u
+        for v in range(vertices):
+            if graph[u][v] > 0:  # Only consider non-zero edges
+                new_dist = dist[u] + graph[u][v]
+
+                # If found shorter path to v, update distance and push to priority queue
+                if new_dist < dist[v]:
+                    dist[v] = new_dist
+                    heapq.heappush(pq, (new_dist, v))
+
+    # Print the distances from src to all vertices
+    print("Vertex \t Distance from Source")
+    for node in range(vertices):
+        print(node, "\t\t", dist[node])
+
+# Driver program
+
+V = 5
+graph = [
+    [0, 25, 30, 0, 0],   # A (index 0)
+    [25, 0, 0, 10, 0],   # 1 (index 1)
+    [30, 0, 0, 15, 5],   # 2 (index 2)
+    [0, 10, 15, 0, 15],  # 3 (index 3)
+    [0, 0, 5, 15, 0]     # 4 (index 4)
 ]
+src = 0
+# dijkstra(V, graph, src)
 
-# Constraint: Coverage
-for i in range(len(N)):
-    for k in K:
-        clause = [-z[k]]  # z_k = 0 if not selected
-        for j in range(len(M)):
-            if d[i][j] <= R[k-1]:
-                clause.append(y[j+1])  # Add y_j if distance constraint is satisfied
-        wcnf.append(clause)
+    
+# constraints = WCNF()
+# # def var_index(i, j, k):
+# #     return (i-1)*slots *length_of_paper_range  + (c-1)*length_of_paper_range + l
 
-# Constraint: Limit the number of centers
-wcnf.append([y[j] for j in M], weight=p)
+# # def var_x(s, c, l):
+# #     return (s-1)*slots *length_of_paper_range  + (c-1)*length_of_paper_range + l
 
-# Constraint: Select exactly one radius
-wcnf.append([z[k] for k in K], weight=1)
-
-# Convert WCNF object to a list of clauses
-clauses = wcnf.hard + [[lit] for lit in wcnf.soft]
-
-# Solve the problem
-solver = Minisat22(bootstrap_with=clauses)
-if solver.solve():
-    model = solver.get_model()
-    print("Satisfiable Model: ", model)
-else:
-    print("Unsatisfiable")
+# print (len(graph)-len(src))
