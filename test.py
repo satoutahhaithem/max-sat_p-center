@@ -10,7 +10,7 @@ def dijkstra(vertices, graph, sources):
         dist[i][src] = 0
         heapq.heappush(pq, (0, src, i))
     while pq:
-        current_dist, u, src_index = heapq.heappop(pq)
+        current_dist, u, src_index = heapq.heappop(pq)   
         if current_dist > dist[src_index][u]:
             continue
         for v in range(vertices):

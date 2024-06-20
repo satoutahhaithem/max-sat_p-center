@@ -52,6 +52,8 @@ sudo apt install python3.10-distutils
 install ceplex from this link : [text](https://www.ibm.com/products/ilog-cplex-optimization-studio)
 ```bash
 cd /home/haithem-sattoutah/Ceplex_installation/cplex/python/3.10/x86-64_linux
+cd /home/mis/CPLEX_Studio129/cplex/python/3.10/x86-64_linux
+
 ```
 # Step 7: Install the CPLEX Python API
 ```bash
