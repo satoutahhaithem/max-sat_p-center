@@ -22,7 +22,7 @@ a = [[[1, 0, 1, 0],
       [0, 0, 1, 0],
       [1, 1, 0, 0]]]
 
-p = 3  # Example limit for the sum of y_j
+p = 1  # Example limit for the sum of y_j
 
 # Create a model
 mdl = Model(name='CalikModel')
