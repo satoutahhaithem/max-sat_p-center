@@ -26,7 +26,7 @@ distinct_distances = sorted(list(unique_distances))
 # Define parameters
 all_Nodes = range(1, nbrNodes + 1)  # Indices for y_j (vertices)
 index_z_k = range(1, len(distinct_distances) + 1)  # Indices for z_k (radii)
-demandNodes = range(1, nbrNodes - p + 1)  # Indices for i (vertices excluding the last p)
+demandNodes = range(1, nbrNodes )  # Indices for i (vertices excluding the last p)
 rho = distinct_distances  # Costs for z_k (radii)
 
 constraints = WCNF()
@@ -47,19 +47,21 @@ for k in index_z_k:
     constraints.append(clause, weight)
 
 # Function to calculate var_a_ijk
-def var_a_ijk(i, j, k, nbrNodes, len_distinct_distances):
-    return (i - 1) * nbrNodes * len_distinct_distances + (j - 1) * len_distinct_distances + k
+# def var_a_ijk(i, j, k, nbrNodes, len_distinct_distances):
+#     return (i - 1) * nbrNodes * len_distinct_distances + (j - 1) * len_distinct_distances + k
 
-# Calculate a_ijk and add constraints
-for k in index_z_k:
-    for i in demandNodes:
-        a_i = []
-        for j in all_Nodes:
-            if graph[i - 1][j - 1] <= distinct_distances[k - 1] and graph[i - 1][j - 1] != 0:
-                a_i.append(var_a_ijk(i, j, k, nbrNodes, len(distinct_distances)))  # Positive literal
-        if a_i:
-            geqCons = PBEnc.geq(lits=a_i, weights=[1] * len(a_i), bound=1, encoding=EncType.sortnetwrk)
-            constraints.extend(geqCons)
+# # Calculate a_ijk and add constraints
+# for k in index_z_k:
+#     for i in all_Nodes:
+        
+#         for j in all_Nodes:
+#             a_i = []
+#             wei
+#             if graph[i - 1][j - 1] <= distinct_distances[k - 1] and graph[i - 1][j - 1] != 0:
+#                 a_i.append(var_a_ijk(i, j, k, nbrNodes, len(distinct_distances)))  # Positive literal
+#         if a_i:
+#             geqCons = PBEnc.geq(lits=y_vars, weights=a_i, bound=1, encoding=EncType.sortnetwrk)
+#             constraints.extend(geqCons)
 
 # At most p y_j variables are true
 amo_clause = CardEnc.atmost(lits=y_vars, bound=p, encoding=EncType.sortnetwrk)
