@@ -22,19 +22,23 @@ def dijkstra(vertices, graph, sources):
                     heapq.heappush(pq, (new_dist, v, src_index))
     return dist
 
+# Problem parameters
 nbrNodes = 3
 g = [
-    [0, 1, 0],  
-    [20, 0, 20],   
-    [15, 50, 0],       
+    [0, 25, 15],  
+    [25, 0, 5],   
+    [15, 5, 0],       
 ]
 p = 2  # Set p to 1
+
+# Compute shortest paths using Dijkstra
 sources = list(range(nbrNodes))
 graph = dijkstra(nbrNodes, g, sources)
 for row in graph:
     print(row)
 print("###########################################################################")
 
+# Extract unique distances
 unique_distances = set()
 for i in range(len(graph)):
     for j in range(len(graph[i])):
@@ -42,12 +46,14 @@ for i in range(len(graph)):
             unique_distances.add(graph[i][j])
 distinct_distances = sorted(list(unique_distances))
 
+# Define variables
 all_Nodes = range(1, nbrNodes + 1)
 index_z_k = range(1, len(distinct_distances) + 1)
 rho = distinct_distances
 
 constraints = WCNF()
 
+# Variable mappings
 y_vars = [j for j in all_Nodes]
 z_vars = [k + nbrNodes for k in index_z_k]
 
@@ -89,7 +95,7 @@ print("Soft constraints:")
 for weight, clause in zip(constraints.wght, constraints.soft):
     print(weight, clause)
 
-with RC2(constraints, solver="g3") as solver:
+with RC2(constraints, solver="cadical153") as solver:
     for model in solver.enumerate():
         print('Model has cost:', solver.cost)
         print('Model:', model)
