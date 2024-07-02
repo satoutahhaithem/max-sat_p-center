@@ -4,6 +4,28 @@ from pysat.card import CardEnc
 from pysat.examples.rc2 import RC2
 import heapq
 
+def create_adjacency_matrix(filename):
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+        
+    # Read the size of the matrix and ignore the 'p' parameter
+    size_info = list(map(int, lines[0].strip().split()))
+    n = size_info[0]  # number of nodes
+    e = size_info[1]  # number of edges
+    p = size_info[2]  # additional parameter
+    
+    # Initialize adjacency matrix with zeros
+    adj_matrix = [[0] * n for _ in range(n)]
+    
+    # Read the edges and weights
+    for line in lines[1:]:
+        i, j, weight = map(int, line.strip().split())
+        # For undirected graph, set both adj_matrix[i-1][j-1] and adj_matrix[j-1][i-1] to weight
+        adj_matrix[i-1][j-1] = weight
+        adj_matrix[j-1][i-1] = weight
+    
+    return adj_matrix, n, e, p
+
 def dijkstra(vertices, graph, sources):
     dist = [[float('inf')] * vertices for _ in range(len(sources))]
     pq = []
@@ -22,20 +44,37 @@ def dijkstra(vertices, graph, sources):
                     heapq.heappush(pq, (new_dist, v, src_index))
     return dist
 
-# Problem parameters
-nbrNodes = 3
-g = [
-    [0, 25, 15],  
-    [25, 0, 5],   
-    [15, 5, 0],       
-]
-p = 1  # Set p to 1
 
-# Compute shortest paths using Dijkstra
-sources = list(range(nbrNodes))
-graph = dijkstra(nbrNodes, g, sources)
-for row in graph:
-    print(row)
+# Specify the filename
+filename = 'instances/pmed1.txt'
+
+# Create the adjacency matrix and get additional parameters
+adj_matrix, n, e, p = create_adjacency_matrix(filename)
+
+# Print the additional parameters
+print(f"Number of nodes: {n}")
+print(f"Number of edges: {e}")
+print(f"Additional parameter (p): {p}")
+
+# Print the adjacency matrix
+# print("Adjacency matrix:")
+# for row in adj_matrix:
+#     print(row)
+
+# Compute shortest paths using Dijkstra's algorithm
+sources = list(range(n))
+graph = dijkstra(n, adj_matrix, sources)
+
+# Print the shortest paths
+print("Shortest paths:")
+# for row in graph:
+#     print(row)
+
+
+
+
+# for row in graph:
+#     print(row)
 print("###########################################################################")
 
 # Extract unique distances
@@ -47,7 +86,7 @@ for i in range(len(graph)):
 distinct_distances = sorted(list(unique_distances))
 
 # Define variables
-all_Nodes = range(nbrNodes)
+all_Nodes = range(n)
 index_z_k = range(len(distinct_distances))
 rho = distinct_distances
 
@@ -56,7 +95,7 @@ top_id = 0
 
 # Variable mappings
 y_vars = [j + 1 for j in all_Nodes]
-z_vars = [k + nbrNodes + 1 for k in index_z_k]
+z_vars = [k + n + 1 for k in index_z_k]
 top_id = max(z_vars)
 
 print("Variable mappings:")
@@ -94,21 +133,21 @@ equa_clause = CardEnc.equals(lits=z_vars, bound=1, encoding=globalEncType, top_i
 constraints.extend(equa_clause)
 top_id = max(top_id, equa_clause.nv)
 
-print("Constraints (WCNF):")
-for clause in constraints.hard:
-    print(clause)
-print("Soft constraints:")
-for weight, clause in zip(constraints.wght, constraints.soft):
-    print(weight, clause)
+# print("Constraints (WCNF):")
+# for clause in constraints.hard:
+#     print(clause)
+# print("Soft constraints:")
+# for weight, clause in zip(constraints.wght, constraints.soft):
+#     print(weight, clause)
 
 with RC2(constraints, solver="cadical153") as solver:
     for model in solver.enumerate():
         print('Model has cost:', solver.cost)
-        print('Model:', model)
-        print("Values for y_j:")
-        for j in all_Nodes:
-            print(f"y_{j+1} = {1 if model[y_vars[j] - 1] > 0 else 0}")
-        print("Values for z_k:")
-        for k in index_z_k:
-            print(f"z_{k+1} = {1 if model[z_vars[k] - 1] > 0 else 0}")
+        # print('Model:', model)
+        # print("Values for y_j:")
+        # for j in all_Nodes:
+        #     print(f"y_{j+1} = {1 if model[y_vars[j] - 1] > 0 else 0}")
+        # print("Values for z_k:")
+        # for k in index_z_k:
+        #     print(f"z_{k+1} = {1 if model[z_vars[k] - 1] > 0 else 0}")
         break

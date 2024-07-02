@@ -52,7 +52,7 @@ y = mdl.binary_var_list(M, name='y')
 z = mdl.binary_var_list(T, name='z')
 
 # Define the objective function
-mdl.maximize(mdl.sum(rho[k] *(1-z[k])  for k in T))
+mdl.minimize(mdl.sum(rho[k] *z[k]  for k in T))
 
 # Constraints
 for i in N:
